@@ -1,22 +1,61 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Descargar vídeos y audios de YouTube</title>
+    <title>Descargar Videos y Audios de YouTube</title>
 </head>
 <body>
-    <h1>Descargar vídeos y audios de YouTube</h1>
-    
+    <h1>Descargar Videos y Audios de YouTube</h1>
+
     <form action="descargar.php" method="post">
-        <label for="url">URL del vídeo de YouTube:</label>
-        <input type="text" id="url" name="url" required>
-        <br>
-        <label for="formato">Formato:</label>
-        <select id="formato" name="formato">
-            <option value="video">Vídeo</option>
-            <option value="audio">Audio</option>
-        </select>
-        <br>
-        <button type="submit">Descargar</button>
+        <label for="url">URL del video de YouTube:</label>
+        <input type="text" name="url" id="url" required>
+        <br><br>
+        <input type="submit" value="Descargar">
     </form>
+
+    <?php
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $url = $_POST['url'];
+        $videoId = obtenerIdVideo($url);
+
+        if ($videoId) {
+            $videoUrl = "https://www.youtube.com/watch?v={$videoId}";
+            $audioUrl = "https://www.youtube.com/watch?v={$videoId}";
+
+            echo "<h2>Enlaces de descarga:</h2>";
+            echo "<p><a href='{$videoUrl}'>Descargar Video</a></p>";
+            echo "<p><a href='{$audioUrl}'>Descargar Audio</a></p>";
+        } else {
+            echo "<p>Por favor, ingresa una URL válida de YouTube.</p>";
+        }
+    }
+
+    function obtenerIdVideo($url) {
+        $pattern =
+            '%^# Match any YouTube URL
+            (?:https?://)?    # Optional scheme. Either http or https
+            (?:www\.)?        # Optional www subdomain
+            (?:               # Group host alternatives
+              youtu\.be/      # Either youtu.be,
+            | youtube\.com    # or youtube.com
+              (?:             # Group path alternatives
+                /embed/       # Either /embed/
+              | /v/           # or /v/
+              | /watch\?v=    # or /watch\?v=
+              )               # End path alternatives.
+            )                 # End host alternatives.
+            ([\w-]{11})       # The video ID.
+            $%x';
+
+        $result = preg_match($pattern, $url, $matches);
+
+        if ($result) {
+            return $matches[1];
+        }
+
+        return false;
+    }
+    ?>
+
 </body>
 </html>
